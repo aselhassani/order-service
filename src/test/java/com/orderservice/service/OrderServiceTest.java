@@ -130,6 +130,7 @@ public class OrderServiceTest {
 
     var savedOrder = orderCaptor.getValue();
 
+    assertThat(savedOrder.getCreatedAt()).isEqualTo(timestamp);
     assertOrderRequestDtoToEntityMapping(customer, createOrderRequestDTO, savedOrder);
     assertOrderEntityToDtoMapping(persistedOrder, result);
   }

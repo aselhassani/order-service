@@ -16,7 +16,6 @@ public class TestHelper {
   private static final String DIGITS = "0123456789";
   private static final Random random = new Random();
 
-
   public static String generateRandomString() {
     return generateRandomString(8);
   }
@@ -38,8 +37,8 @@ public class TestHelper {
   public static CreateOrderRequestDTO createCreateOrderRequestDTO(int quantity) {
 
     return CreateOrderRequestDTO.builder()
-        .firstname(generateRandomString())
-        .lastname(generateRandomString())
+        .firstName(generateRandomString())
+        .lastName(generateRandomString())
         .quantity(quantity)
         .phoneNumber(generateRandomPhoneNumber())
         .deliveryAddress(generateRandomString(20))
@@ -74,8 +73,8 @@ public class TestHelper {
 
 
     return OrderResponseDTO.builder()
-        .firstname(generateRandomString())
-        .lastname(generateRandomString())
+        .firstName(generateRandomString())
+        .lastName(generateRandomString())
         .quantity(generateValidQty())
         .phoneNumber(generateRandomPhoneNumber())
         .deliveryAddress(generateRandomString(30))
