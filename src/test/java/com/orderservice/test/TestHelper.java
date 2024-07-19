@@ -115,4 +115,7 @@ public class TestHelper {
         .build();
   }
 
+  public static String generateRandomOrderNumber() {
+    return generateRandomString(6);
+  }
 }

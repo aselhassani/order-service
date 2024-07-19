@@ -57,7 +57,7 @@ class OrderControllerTest {
   void updateOrderShouldUpdateOrderAndReturnIt(int quantity) {
 
     var updateOrderRequestDTO = TestHelper.createUpdateOrderRequestDTO(quantity);
-    var orderNumber = "XJ565B";
+    var orderNumber = TestHelper.generateRandomOrderNumber();
     var orderResponseDTO = TestHelper.createOrderResponseDTO();
 
     when(orderService.updateOrder(any(), any())).thenReturn(orderResponseDTO);
@@ -72,7 +72,7 @@ class OrderControllerTest {
   @ValueSource(ints = {-1, -2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20})
   void updateOrderShouldThrowExceptionForInvalidOrderQuantity(int qty) {
 
-    var orderNumber = "CPJ567";
+    var orderNumber = TestHelper.generateRandomOrderNumber();
     var dto = TestHelper.createUpdateOrderRequestDTO(qty);
 
     assertThatExceptionOfType(InvalidOrderQuantityException.class)

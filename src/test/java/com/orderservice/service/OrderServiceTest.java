@@ -51,7 +51,7 @@ public class OrderServiceTest {
 
   @BeforeEach
   void setup() {
-    orderNumber = TestHelper.generateRandomString(6);
+    orderNumber = TestHelper.generateRandomOrderNumber();
     unitPrice = new Random().nextDouble();
     timestamp = Instant.now();
   }
