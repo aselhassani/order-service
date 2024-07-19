@@ -4,6 +4,7 @@ import com.orderservice.dto.ErrorDTO;
 import com.orderservice.exception.ErrorCode;
 import com.orderservice.exception.InvalidOrderQuantityException;
 import com.orderservice.exception.OrderNotFoundException;
+import com.orderservice.exception.UpdateNotAllowedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,6 +26,13 @@ public class ControllerExceptionHandler {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorDTO handleOrderNotFoundException(OrderNotFoundException ex) {
     return new ErrorDTO(ErrorCode.ORDER_NOT_FOUND.getValue(), ex.getMessage());
+  }
+
+  @ExceptionHandler(value = UpdateNotAllowedException.class)
+  @ResponseBody
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorDTO handleUpdateNotAllowedException(UpdateNotAllowedException ex) {
+    return new ErrorDTO(ErrorCode.UPDATE_NOT_ALLOWED.getValue(), ex.getMessage());
   }
 
 }

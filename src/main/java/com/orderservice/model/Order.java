@@ -31,8 +31,8 @@ public class Order {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
-  @Column(unique = true, nullable = false)
-  private String number;
+  @Column(name = "order_number", unique = true, nullable = false)
+  private String orderNumber;
 
   @With
   private Integer quantity;
@@ -43,7 +43,7 @@ public class Order {
   @Column(name = "created_at")
   private Instant createdAt;
 
-  @Column(name = "updatedAt")
+  @Column(name = "updated_at")
   @With
   private Instant updatedAt;
 

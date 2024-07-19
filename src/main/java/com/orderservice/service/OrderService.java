@@ -5,10 +5,13 @@ import com.orderservice.dto.CreateOrderRequestDTO;
 import com.orderservice.dto.OrderResponseDTO;
 import com.orderservice.dto.UpdateOrderRequestDTO;
 import com.orderservice.exception.OrderNotFoundException;
+import com.orderservice.exception.UpdateNotAllowedException;
 import com.orderservice.model.Customer;
 import com.orderservice.model.Order;
 import com.orderservice.repository.CustomerRepository;
 import com.orderservice.repository.OrderRepository;
+import java.time.Duration;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +32,8 @@ public class OrderService {
     var customer = customerRepository.findByPhoneNumber(dto.phoneNumber())
         .orElseGet(() -> customerRepository.save(
             Customer.builder()
-                .firstname(dto.firstname())
-                .lastname(dto.lastname())
+                .firstname(dto.firstName())
+                .lastName(dto.lastName())
                 .phoneNumber(dto.phoneNumber())
                 .build())
         );
@@ -47,7 +50,7 @@ public class OrderService {
         .customer(customer)
         .quantity(dto.quantity())
         .totalPrice(totalPrice)
-        .number(orderNumber)
+        .orderNumber(orderNumber)
         .build();
 
     return OrderResponseDTO.fromEntity(orderRepository.save(order));
@@ -56,10 +59,18 @@ public class OrderService {
 
   public OrderResponseDTO updateOrder(String orderNumber, UpdateOrderRequestDTO dto) {
 
-    return orderRepository.findByNumber(orderNumber)
+    var order = orderRepository.findByOrderNumber(orderNumber)
+        .orElseThrow(() -> new OrderNotFoundException(orderNumber));
+
+    var updatedAt = timeService.now();
+
+    if (Duration.between(order.getCreatedAt(), updatedAt).toSeconds() > 5*60) {
+      throw new UpdateNotAllowedException();
+    }
+
+    return Optional.of(order)
         .map(entity -> {
           var unitPrice = appConfig.getUnitPrice();
-          var updatedAt = timeService.now();
           var quantity = dto.quantity();
           var deliveryAddress = dto.deliveryAddress();
           var totalPrice = quantity * unitPrice;
@@ -71,6 +82,6 @@ public class OrderService {
         })
         .map(orderRepository::save)
         .map(OrderResponseDTO::fromEntity)
-        .orElseThrow(() -> new OrderNotFoundException(orderNumber));
+        .orElse(null);
   }
 }

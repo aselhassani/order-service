@@ -7,9 +7,9 @@ import lombok.Builder;
 @Builder
 public record CreateOrderRequestDTO(
     @NotBlank
-    String firstname,
+    String firstName,
     @NotBlank
-    String lastname,
+    String lastName,
     @NotBlank
     String phoneNumber,
     @NotNull

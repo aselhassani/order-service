@@ -91,26 +91,29 @@ public class TestHelper {
     return Customer.builder()
         .id(random.nextLong())
         .firstname(generateRandomString())
-        .lastname(generateRandomString())
+        .lastName(generateRandomString())
         .phoneNumber(generateRandomPhoneNumber())
         .build();
   }
 
   public static Order createOrder() {
+    return createOrder(Instant.now());
+  }
+  public static Order createOrder(Instant createdAt) {
 
-    var timestamp = Instant.now();
     var unitPrice = random.nextDouble();
     var qty = generateValidQty();
 
     return Order.builder()
         .id(random.nextLong())
-        .number(generateRandomString(6))
+        .orderNumber(generateRandomString(6))
         .customer(createCustomer())
         .quantity(qty)
         .totalPrice(qty * unitPrice)
         .deliveryAddress(generateRandomString(30))
-        .createdAt(timestamp)
-        .updatedAt(timestamp)
+        .createdAt(createdAt)
+        .updatedAt(createdAt)
         .build();
   }
+
 }

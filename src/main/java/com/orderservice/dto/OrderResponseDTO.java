@@ -6,8 +6,8 @@ import lombok.Builder;
 
 @Builder
 public record OrderResponseDTO(
-    String firstname,
-    String lastname,
+    String firstName,
+    String lastName,
     String phoneNumber,
     Integer quantity,
     String orderNumber,
@@ -19,11 +19,11 @@ public record OrderResponseDTO(
 
   public static OrderResponseDTO fromEntity(Order entity) {
     return OrderResponseDTO.builder()
-        .firstname(entity.getCustomer().getFirstname())
-        .lastname(entity.getCustomer().getLastname())
+        .firstName(entity.getCustomer().getFirstname())
+        .lastName(entity.getCustomer().getLastName())
         .phoneNumber(entity.getCustomer().getPhoneNumber())
         .quantity(entity.getQuantity())
-        .orderNumber(entity.getNumber())
+        .orderNumber(entity.getOrderNumber())
         .deliveryAddress(entity.getDeliveryAddress())
         .createdAt(entity.getCreatedAt())
         .updatedAt(entity.getUpdatedAt())

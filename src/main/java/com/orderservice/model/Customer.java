@@ -1,5 +1,6 @@
 package com.orderservice.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -26,8 +27,11 @@ public class Customer {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
+  @Column(name = "first_name")
   private String firstname;
-  private String lastname;
+  @Column(name = "last_name")
+  private String lastName;
+  @Column(name = "phone_number", unique = true, nullable = false)
   private String phoneNumber;
 
   @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)

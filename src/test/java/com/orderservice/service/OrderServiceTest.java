@@ -11,6 +11,7 @@ import com.orderservice.dto.CreateOrderRequestDTO;
 import com.orderservice.dto.OrderResponseDTO;
 import com.orderservice.dto.UpdateOrderRequestDTO;
 import com.orderservice.exception.OrderNotFoundException;
+import com.orderservice.exception.UpdateNotAllowedException;
 import com.orderservice.model.Customer;
 import com.orderservice.model.Order;
 import com.orderservice.repository.CustomerRepository;
@@ -22,6 +23,8 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -42,7 +45,6 @@ public class OrderServiceTest {
   private TimeService timeService;
   @InjectMocks
   private OrderService underTest;
-
   private String orderNumber;
   private double unitPrice;
   private Instant timestamp;
@@ -117,11 +119,11 @@ public class OrderServiceTest {
     var customerCaptor = ArgumentCaptor.forClass(Customer.class);
     verify(customerRepository).save(customerCaptor.capture());
 
-    var inCustomer = customerCaptor.getValue();
+    var savedCustomer = customerCaptor.getValue();
 
-    assertThat(inCustomer.getFirstname()).isEqualTo(createOrderRequestDTO.firstname());
-    assertThat(inCustomer.getLastname()).isEqualTo(createOrderRequestDTO.lastname());
-    assertThat(inCustomer.getPhoneNumber()).isEqualTo(createOrderRequestDTO.phoneNumber());
+    assertThat(savedCustomer.getFirstname()).isEqualTo(createOrderRequestDTO.firstName());
+    assertThat(savedCustomer.getLastName()).isEqualTo(createOrderRequestDTO.lastName());
+    assertThat(savedCustomer.getPhoneNumber()).isEqualTo(createOrderRequestDTO.phoneNumber());
 
     var orderCaptor = ArgumentCaptor.forClass(Order.class);
     verify(orderRepository).save(orderCaptor.capture());
@@ -132,22 +134,23 @@ public class OrderServiceTest {
     assertOrderEntityToDtoMapping(persistedOrder, result);
   }
 
+  @ParameterizedTest
+  @ValueSource(longs = {60, 120, 180, 240, 300})
+  void updateOrderShouldUpdateOrderAndReturnIt(long elapsedSecondsSinceCreation) {
 
-  @Test
-  void updateOrderShouldUpdateOrderAndReturnIt() {
-
+    var timestamp = Instant.now();
     var updateOrderRequestDTO = TestHelper.createUpdateOrderRequestDTO();
-    var existingOrder = TestHelper.createOrder();
+    var existingOrder = TestHelper.createOrder(timestamp.minusSeconds(elapsedSecondsSinceCreation));
     var updatedOrder = TestHelper.createOrder();
 
-    when(orderRepository.findByNumber(any())).thenReturn(Optional.of(existingOrder));
+    when(orderRepository.findByOrderNumber(any())).thenReturn(Optional.of(existingOrder));
     when(orderRepository.save(any())).thenReturn(updatedOrder);
     when(timeService.now()).thenReturn(timestamp);
     when(appConfiguration.getUnitPrice()).thenReturn(unitPrice);
 
     var result = underTest.updateOrder(orderNumber, updateOrderRequestDTO);
 
-    verify(orderRepository).findByNumber(orderNumber);
+    verify(orderRepository).findByOrderNumber(orderNumber);
     verify(appConfiguration).getUnitPrice();
     verify(timeService).now();
 
@@ -160,17 +163,33 @@ public class OrderServiceTest {
     assertThat(savedOrder.getUpdatedAt()).isEqualTo(timestamp);
     assertOrderRequestDtoToEntityMapping(updateOrderRequestDTO, existingOrder, savedOrder);
     assertOrderEntityToDtoMapping(updatedOrder, result);
+  }
 
+  @ParameterizedTest
+  @ValueSource(longs = {320, 600, 900, 1000})
+  void updateOrderShouldThrowExceptionIfUpdateNotAllowed(long elapsedSecondsSinceCreation) {
+
+    var timestamp =  Instant.now();
+    var createdAt = timestamp.minusSeconds(elapsedSecondsSinceCreation);
+
+    var existingOrder = TestHelper.createOrder(createdAt);
+
+    var updateOrderRequestDTO = TestHelper.createUpdateOrderRequestDTO();
+
+    when(orderRepository.findByOrderNumber(any())).thenReturn(Optional.of(existingOrder));
+    when(timeService.now()).thenReturn(timestamp);
+
+    assertThatExceptionOfType(UpdateNotAllowedException.class)
+        .isThrownBy(() -> underTest.updateOrder(orderNumber, updateOrderRequestDTO));
   }
 
 
   @Test
   void updateOrderShouldThrowExceptionIfOrderDoesNotExist() {
 
-
     var updateOrderRequestDTO = TestHelper.createUpdateOrderRequestDTO();
 
-    when(orderRepository.findByNumber(any())).thenReturn(Optional.empty());
+    when(orderRepository.findByOrderNumber(any())).thenReturn(Optional.empty());
 
     assertThatExceptionOfType(OrderNotFoundException.class)
         .isThrownBy(() -> underTest.updateOrder(orderNumber, updateOrderRequestDTO));
@@ -179,7 +198,7 @@ public class OrderServiceTest {
   }
 
   private void assertOrderRequestDtoToEntityMapping(Customer customer, CreateOrderRequestDTO requestDTO, Order entity) {
-    assertThat(entity.getNumber()).isEqualTo(orderNumber);
+    assertThat(entity.getOrderNumber()).isEqualTo(orderNumber);
     assertThat(entity.getCustomer()).isEqualTo(customer);
     assertThat(entity.getQuantity()).isEqualTo(requestDTO.quantity());
     assertThat(entity.getDeliveryAddress()).isEqualTo(requestDTO.deliveryAddress());
@@ -189,12 +208,12 @@ public class OrderServiceTest {
   private static void assertOrderEntityToDtoMapping(Order entity, OrderResponseDTO dto) {
     assertThat(dto.createdAt()).isEqualTo(entity.getCreatedAt());
     assertThat(dto.updatedAt()).isEqualTo(entity.getUpdatedAt());
-    assertThat(dto.orderNumber()).isEqualTo(entity.getNumber());
+    assertThat(dto.orderNumber()).isEqualTo(entity.getOrderNumber());
     assertThat(dto.quantity()).isEqualTo(entity.getQuantity());
     assertThat(dto.totalPrice()).isEqualTo(entity.getTotalPrice());
     assertThat(dto.deliveryAddress()).isEqualTo(entity.getDeliveryAddress());
-    assertThat(dto.firstname()).isEqualTo(entity.getCustomer().getFirstname());
-    assertThat(dto.lastname()).isEqualTo(entity.getCustomer().getLastname());
+    assertThat(dto.firstName()).isEqualTo(entity.getCustomer().getFirstname());
+    assertThat(dto.lastName()).isEqualTo(entity.getCustomer().getLastName());
     assertThat(dto.phoneNumber()).isEqualTo(entity.getCustomer().getPhoneNumber());
   }
 
