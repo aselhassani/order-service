@@ -40,7 +40,7 @@ class OrderControllerTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {1, 2, 3, 4,  6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20})
+  @ValueSource(ints = {1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20})
   void createOrderShouldThrowExceptionForInvalidOrderQuantity(int qty) {
 
     var dto = TestHelper.createCreateOrderRequestDTO(qty);
@@ -69,7 +69,7 @@ class OrderControllerTest {
   }
 
   @ParameterizedTest
-  @ValueSource(ints = {-1, -2, 3, 4,  6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20})
+  @ValueSource(ints = {-1, -2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20})
   void updateOrderShouldThrowExceptionForInvalidOrderQuantity(int qty) {
 
     var orderNumber = "CPJ567";
